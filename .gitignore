@@ -1,0 +1,10 @@
+env/*
+*.pyc
+*.sqlite3
+media/*
+*.DS_Store
+node_modules
+.idea/*
+.coverage
+cover/*
+sitedoicaro/local.py

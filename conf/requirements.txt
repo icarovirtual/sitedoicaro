@@ -1,0 +1,4 @@
+Django==1.10.3
+coverage
+django-nose
+django-test-without-migrations
