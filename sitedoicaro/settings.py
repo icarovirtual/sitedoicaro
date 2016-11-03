@@ -78,11 +78,10 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
     '--nologcapture',
+    '--nocapture',
     '--with-coverage',
-    '--cover-package=common',
-    '--cover-package=questionario',
-    '--cover-html',
-    '--nocapture'
+    '--cover-package=website',
+    '--cover-html'
 ]
 
 TEST_WITHOUT_MIGRATIONS_COMMAND = 'django_nose.management.commands.test.Command'

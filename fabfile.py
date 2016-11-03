@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 
 
-import os
 import time
 
-from django.conf import settings
 from fabric.contrib.files import exists
 from fabric.operations import require, local, sudo, run, put
 from fabric.state import env
 
+from conf.production.server import production
 
-if not os.path.exists(os.path.join(settings.BASE_DIR, 'conf', 'production', 'server.py')):
-    raise Exception(u"Couldn't import the fabric configuration file... Create a 'server.py' file in the server configuration directory.")
-else:
-    from conf.production.server import production
 
 env.project_name = 'sitedoicaro'
 
@@ -30,7 +25,7 @@ def setup():
     """ Setup the machine to receive a new (or first) server instance and then runs deployment. """
     require('hosts', provided_by=servers)
     require('path')
-    packages_to_install = ['build-essential', 'python-setuptools', 'python-dev', 'libevent-dev', 'libmysqlclient-dev', 'python-mysqldb', 'libjpeg8-dev', 'nginx', 'git-core']
+    packages_to_install = ['build-essential', 'python-setuptools', 'python-dev', 'libevent-dev', 'libmysqlclient-dev', 'python-mysqldb', 'libjpeg8-dev', 'nginx', 'git-core', 'upstart', 'upstart-sysv']
     for package in packages_to_install:
         sudo('apt-get install -y ' + package)
     sudo('easy_install pip')
@@ -82,8 +77,7 @@ def install_site():
     require('service_name')
     require('site_name')
     require('release', provided_by=[deploy, setup])
-    if not exists('/etc/init/%(service_name)s.conf' % env, use_sudo=True):
-        put('conf/%(config_dir)s/service.conf' % env, '/etc/init/%(service_name)s.conf' % env, use_sudo=True)
+    put('conf/%(config_dir)s/service.conf' % env, '/etc/init/%(service_name)s.conf' % env, use_sudo=True)
     put('conf/%(config_dir)s/nginx.conf' % env, '/etc/nginx/sites-available/%(site_name)s' % env, use_sudo=True)
     if not exists('/etc/nginx/sites-enabled/%(site_name)s' % env):
         sudo('ln -s /etc/nginx/sites-available/%(site_name)s /etc/nginx/sites-enabled/%(site_name)s' % env)
@@ -118,11 +112,6 @@ def collect_static():
     run('source %(path)s/env/bin/activate; cd %(path)s/releases/current/; python manage.py collectstatic --noinput' % env)
 
 
-def remove_remote_package():
-    u""" Remove the git package for this release. """
-    run('rm %(path)s/packages/%(release)s.tar.gz' % env)
-
-
 # noinspection PyBroadException
 def restart_webserver():
     """ Restart the webserver to apply changes. """
@@ -136,3 +125,8 @@ def restart_webserver():
         sudo('start %(service_name)s' % env)
     except:  # Might be already started
         pass
+
+
+def remove_remote_package():
+    u""" Remove the git package for this release. """
+    run('rm %(path)s/packages/%(release)s.tar.gz' % env)

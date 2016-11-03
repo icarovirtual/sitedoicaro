@@ -1,0 +1,17 @@
+[run]
+omit =
+        */admin.py
+        */__init__.py
+        */settings.py
+
+[report]
+exclude_lines =
+        pragma: no cover
+        def __unicode__
+        # Model fields declaration
+        ^.+models\..+Field\(.+\)$
+        ^.+models\.ForeignKey\(.+\)$
+        ^.+models\.OneToOne\(.+\)$
+        ^.+models\.ManyToMany\(.+\)$
+        # "Meta" class and its fields
+        ^.+class Meta
